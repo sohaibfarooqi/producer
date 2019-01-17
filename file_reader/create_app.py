@@ -19,7 +19,7 @@ def create_app(testing=False):
       config_module = TestingConfig
   app.config.from_object(config_module)
 
-  for api_version in ALL_AVAILABLE_VERSIONS:
-    app.register_blueprint(api_version)
+  for api_version, prefix in ALL_AVAILABLE_VERSIONS:
+    app.register_blueprint(api_version, url_prefix=prefix)
 
   return app
