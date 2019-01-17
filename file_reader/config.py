@@ -4,6 +4,7 @@ class Config(object):
     """
     DEBUG = False
     TESTING = False
+    DATA_FILE_PATH = "date_files"
 
 class DevelopmentConfig(Config):
     """
