@@ -42,10 +42,10 @@ class Producer(celery_app.Task):
     logger.info("Processing file: {}".format(file))
 
     self.group_id = uuid()
-    reader = csv.reader(open(file, 'r'), delimiter=sep)
+    data = open(file, 'r')
+    reader = csv.reader(data, delimiter=sep)
 
-    self._check_file_empty(reader)
-    self._skip_headers(reader, header_rows)
+    reader = self._skip_headers(reader, header_rows)
 
     base_obj = {
       "parent_task_id": self.group_id,
@@ -59,7 +59,7 @@ class Producer(celery_app.Task):
             **base_obj
         }
         grouped_task.append(signature(consumer, kwargs=obj, queue=queue))
-      except KeyError:
+      except IndexError:
         logger.error("Malformed row at index: {}".format(index))
 
     if grouped_task:
@@ -80,11 +80,9 @@ class Producer(celery_app.Task):
     """
     logger.info("task: {} with group-id: {} is successful".format(self.group_id, task_id))
 
-  def _check_file_empty(self, reader):
-    next(reader)
-
   def _skip_headers(self, reader, header_rows):
     [next(reader) for _ in range(header_rows)]
+    return reader
 
   def _parse_row(self, row, column_map):
     return {k:row[val] for k, val in column_map.items()}
