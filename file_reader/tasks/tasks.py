@@ -36,13 +36,16 @@ class Producer(celery_app.Task):
 
     Raises:
     ------
-      - StopIteration: In case file is empty
+      - StopIteration: In case file is empty or header rows are less
+      than specified in params
     """
     logger.info("Processing file: {}".format(file))
 
     self.group_id = uuid()
     reader = csv.reader(open(file, 'r'), delimiter=sep)
-    [next(reader, None) for _ in range(header_rows)]
+
+    self._check_file_empty(reader)
+    self._skip_headers(reader, header_rows)
 
     base_obj = {
       "parent_task_id": self.group_id,
@@ -52,7 +55,7 @@ class Producer(celery_app.Task):
     for index, row in enumerate(reader):
       try:
         obj = {
-            **{k:row[val] for k, val in column_map.items()},
+            **self._parse_row(row, column_map),
             **base_obj
         }
         grouped_task.append(signature(consumer, kwargs=obj, queue=queue))
@@ -76,6 +79,15 @@ class Producer(celery_app.Task):
     In celery task this function gets invoked when a task execute successfully.
     """
     logger.info("task: {} with group-id: {} is successful".format(self.group_id, task_id))
+
+  def _check_file_empty(self, reader):
+    next(reader)
+
+  def _skip_headers(self, reader, header_rows):
+    [next(reader) for _ in range(header_rows)]
+
+  def _parse_row(self, row, column_map):
+    return {k:row[val] for k, val in column_map.items()}
 
 celery_app.tasks.register(Producer())
 
