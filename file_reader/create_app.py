@@ -57,9 +57,6 @@ def create_app(testing=False):
     except UploadNotAllowed:
       return jsonify({"message": "Requested file format not allowed"}), 406
 
-    except (StopIteration, RuntimeError):
-      return jsonify({"message": "Received empty file"}), 400
-
     return jsonify({"message": "ok"}), 200
 
   return app
