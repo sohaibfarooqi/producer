@@ -19,5 +19,4 @@ class TestingConfig(Config):
     with Flask test client.
     """
     TESTING = True
-    MOCK_SERVER_HOST = "localhost"
-    MOCK_SERVER_PORT = 8000
+    SERVER_NAME = "localhost"
