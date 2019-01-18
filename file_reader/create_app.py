@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_uploads import UploadSet, configure_uploads, UploadNotAllowed
 from .config import DevelopmentConfig, TestingConfig
-
+from .tasks import Producer
 
 def create_app(testing=False):
   """
@@ -43,6 +43,8 @@ def create_app(testing=False):
     try:
       data_file = request.files['file']
       file = upload_set.save(data_file)
+      producer = Producer()
+      producer.s("{}/{}".format(app.config['DATA_FILE_PATH'], file)).apply_async()
     except UploadNotAllowed:
       return jsonify({"message": "Requested file format not allowed"}), 406
     return jsonify({"message": "ok"}), 200
