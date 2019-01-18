@@ -16,7 +16,7 @@ def create_app(testing=False):
 
   Returns:
   --------
-    flask.Flask app instance
+    `flask.Flask` instance
 
   Example Invocation:
   ------------------
@@ -37,16 +37,29 @@ def create_app(testing=False):
 
   upload_set = UploadSet('datafiles', extensions=('csv',), default_dest=lambda x: app.config['DATA_FILE_PATH'])
   configure_uploads(app, (upload_set,))
+  producer = Producer()
 
   @app.route('/upload', methods=('POST',))
   def upload_file():
+    """
+    Returns:
+    --------
+      - 200: Request Successful.
+      - 406: Input file format not allowed.
+      - 400: Empty file received.
+    """
     try:
+
       data_file = request.files['file']
       file = upload_set.save(data_file)
-      producer = Producer()
       producer.s("{}/{}".format(app.config['DATA_FILE_PATH'], file)).apply_async()
+
     except UploadNotAllowed:
       return jsonify({"message": "Requested file format not allowed"}), 406
+
+    except StopIteration:
+      return jsonify({"message": "Received empty file"}), 400
+
     return jsonify({"message": "ok"}), 200
 
   return app
