@@ -11,6 +11,9 @@ def app():
 
 @pytest.fixture
 def invalid_file():
+    """
+    Fixture to generate invalid file extention.
+    """
     file_name = 'invalid_test.txt'
     file = open(file_name, 'w')
     file.close()
@@ -19,6 +22,9 @@ def invalid_file():
 
 @pytest.fixture
 def valid_file():
+    """
+    Fixture to generate valid CSV file.
+    """
     file_name = 'valid_test.csv'
     file = open(file_name, 'w')
     writer = csv.writer(file)
@@ -29,6 +35,9 @@ def valid_file():
 
 @pytest.fixture
 def file_with_header():
+    """
+    Fixture to generate valid CSV file with header.
+    """
     file_name = 'file_with_header.csv'
     file = open(file_name, 'w')
     writer = csv.writer(file)
@@ -40,6 +49,9 @@ def file_with_header():
 
 @pytest.fixture
 def file_with_seperator():
+    """
+    Fixture to generate valid CSV file with `|` seperator.
+    """
     file_name = 'file_with_seperator.csv'
     file = open(file_name, 'w')
     writer = csv.writer(file, delimiter='|')
@@ -50,6 +62,10 @@ def file_with_seperator():
 
 @pytest.fixture
 def custom_file_format():
+    """
+    Fixture to generate valid CSV file with header, '|' seperator
+    and multiple rows.
+    """
     file_name = 'custom_file_format.csv'
     file = open(file_name, 'w')
     writer = csv.writer(file, delimiter='|')
