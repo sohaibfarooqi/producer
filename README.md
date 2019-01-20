@@ -23,7 +23,7 @@ Run the following two commands in two seperate shells
 
 At this point the app is ready to accept new files. Use the following script to test:
 
-```
+```python
 import requests
 files = {'file': open('test.csv', 'r')}
 requests.post('http://localhost:5000/upload', files=files)
@@ -32,6 +32,23 @@ requests.post('http://localhost:5000/upload', files=files)
 **NOTE** By default the producer will send messages to `test` queue and expect consumer to
 be a celery task named `consumer`.
 
-### Pre-commit hooks
+### Running tests
+Follow these commands to run tests and generate coverage reports
+
+ - `pip install -r requirements/test.txt`
+ - `pytest`
+ - `pytest --cov=producer tests/`
+
+### Third Party Packages
+ - [Celery](http://docs.celeryproject.org/en/latest/index.html) Distributed queue management.
+ - [Flask](https://www.sqlalchemy.org/) WSGI server.
+ - [Isort](https://readthedocs.org/projects/isort/) Sorting and arranging imports.
+ - [Autopep8](https://github.com/hhatto/autopep8) Code styling to conform with PEP8
+ - [Pytest](https://docs.pytest.org/en/latest/) Running test cases.
+
+### Git pre-commit hooks
+Github pre-commit hooks can be ver useful to automate things like code formating, running linters and checking
+for missing migrations. Use following commands to enable them:
+
   - Run `pre-commit install` to enable the hook into your git repo. The hook will run automatically for each commit.
   - Run `git commit -m "Your message" -n` to skip the hook if you need.
