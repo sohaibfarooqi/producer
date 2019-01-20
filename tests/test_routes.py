@@ -1,5 +1,6 @@
 from flask import url_for
 
+
 def test_without_file(app):
   """
   Test file upload API without file. Endpoint should throw

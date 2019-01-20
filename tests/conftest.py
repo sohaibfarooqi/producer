@@ -1,5 +1,10 @@
-import pytest, csv, os
+import csv
+import os
+
+import pytest
+
 from producer import create_app
+
 
 @pytest.fixture(scope='session')
 def app():
@@ -75,6 +80,3 @@ def custom_file_format():
     file.close()
     yield file_name
     os.remove(file_name)
-
-
-

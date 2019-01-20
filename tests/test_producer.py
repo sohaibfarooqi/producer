@@ -1,5 +1,10 @@
-import csv, pytest, celery
+import csv
+
+import celery
+import pytest
+
 from producer import Producer
+
 
 def test_header_rows(file_with_header):
   """
@@ -42,4 +47,3 @@ def test_successful_execution(custom_file_format):
   column_map = {'email': 0, 'name': 1}
   task_id = p.s(custom_file_format, header_rows=header, column_map=column_map, sep='|').apply_async()
   assert isinstance(task_id, celery.result.EagerResult)
-
