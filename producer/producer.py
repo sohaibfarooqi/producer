@@ -46,31 +46,18 @@ class Producer(celery_app.Task):
         """
         logger.info("Processing file: {}".format(file))
 
-        self.group_id = uuid()
         data = open(file, 'r')
         reader = csv.reader(data, delimiter=sep)
 
-        reader = self._skip_headers(reader, header_rows)
+        self.group_id = uuid()
+        self.header_rows = header_rows
+        self.column_map = column_map
+        self.consumer = consumer
+        self.queue = queue
 
-        base_obj = {
-            "parent_task_id": self.group_id,
-            "timestamp": time.time()
-        }
-        grouped_task = list()
-        for index, row in enumerate(reader):
-            try:
-                obj = {
-                    **self._parse_row(row, column_map),
-                    **base_obj
-                }
-                grouped_task.append(
-                    signature(consumer, kwargs=obj, queue=queue))
-            except IndexError:
-                logger.error("Malformed row at index: {}".format(index))
-
-        if grouped_task:
-            workflow = group(grouped_task)
-            return workflow.apply_async(task_id=self.group_id)
+        reader = self._skip_headers(reader)
+        workflow = group(self._generate_rows(reader))
+        return workflow.apply_async(task_id=self.group_id)
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         """
@@ -88,12 +75,37 @@ class Producer(celery_app.Task):
         logger.info(
             "task: {} with group-id: {} is successful".format(self.group_id, task_id))
 
-    def _skip_headers(self, reader, header_rows):
-        [next(reader) for _ in range(header_rows)]
+    def _generate_rows(self, reader):
+        """
+        Generate consumer function signature in required
+        format for group celery task.
+        """
+        base_obj = {
+            "parent_task_id": self.group_id,
+            "timestamp": time.time()
+        }
+        for index, row in enumerate(reader):
+            try:
+                obj = {
+                    **self._parse_row(row),
+                    **base_obj
+                }
+                yield signature(self.consumer, kwargs=obj, queue=self.queue)
+            except IndexError:
+                logger.error("Malformed row at index: {}".format(index))
+
+    def _skip_headers(self, reader):
+        """
+        This helper function helps Producer to skip header rows
+        """
+        [next(reader) for _ in range(self.header_rows)]
         return reader
 
-    def _parse_row(self, row, column_map):
-        return {k: row[val] for k, val in column_map.items()}
+    def _parse_row(self, row):
+        """
+        This function parse CVS file rows based on column_map specification.
+        """
+        return {k: row[val] for k, val in self.column_map.items()}
 
 
 celery_app.tasks.register(Producer())
