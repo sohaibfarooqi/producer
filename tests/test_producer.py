@@ -11,12 +11,12 @@ def test_header_rows(file_with_header):
   Test Producer class with header rows parameter values.
   """
   p = Producer()
-  header = 1
+  p.header_rows = 1
   total_rows = sum(1 for row in csv.reader(file_with_header))
   file_with_header.seek(0)
-  reader = p._skip_headers(file_with_header, header_rows=header)
+  reader = p._skip_headers(file_with_header)
   out_rows = sum(1 for row in reader)
-  assert total_rows == (out_rows + header)
+  assert total_rows == (out_rows + p.header_rows)
 
 def test_column_map(file_with_header):
   """
@@ -24,10 +24,10 @@ def test_column_map(file_with_header):
   """
   p = Producer()
   reader = csv.reader(file_with_header)
-  column_map = {'name': 1, 'email': 2}
+  p.column_map = {'name': 1, 'email': 2}
   for line in reader:
     with pytest.raises(IndexError):
-      p._parse_row(line, column_map=column_map)
+      p._parse_row(line)
 
 def test_seperator(file_with_seperator):
   """
