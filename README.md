@@ -23,6 +23,8 @@ Run the following two commands in two seperate shells
 
 At this point the app is ready to accept new files. Use the following script to test:
 
+Install requests package using `pip install requests`
+
 ```python
 import requests
 files = {'file': open('test.csv', 'r')}
